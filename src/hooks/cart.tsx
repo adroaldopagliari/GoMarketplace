@@ -39,10 +39,11 @@ const CartProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     async function loadProducts(): Promise<void> {
-      const storageProducts = await getCurrentStorage();
+      const storageProducts = await AsyncStorage.getItem('@GoMarketplace:cart');
+      console.log(storageProducts);
 
       if (storageProducts) {
-        setProducts(storageProducts);
+        setProducts(JSON.parse(storageProducts));
       }
     }
 
@@ -60,12 +61,14 @@ const CartProvider: React.FC = ({ children }) => {
         quantity: 1,
       };
 
-      await AsyncStorage.setItem(
-        `@GoMarketplace:${id}`,
-        JSON.stringify(product),
-      );
-
       setProducts([...products, product]);
+
+      console.log(products);
+
+      await AsyncStorage.setItem(
+        `@GoMarketplace:cart`,
+        JSON.stringify(products),
+      );
     },
     [products],
   );
@@ -81,17 +84,13 @@ const CartProvider: React.FC = ({ children }) => {
         return item;
       });
 
-      const productUpdatedIndex = productsIncremented.findIndex(
-        item => item.id === id,
-      );
-
-      await AsyncStorage.removeItem(`@GoMarketplace:${id}`);
-      await AsyncStorage.setItem(
-        `@GoMarketplace:${id}`,
-        JSON.stringify(productsIncremented[productUpdatedIndex]),
-      );
-
       setProducts(productsIncremented);
+
+      await AsyncStorage.removeItem(`@GoMarketplace:cart`);
+      await AsyncStorage.setItem(
+        `@GoMarketplace:cart`,
+        JSON.stringify(productsIncremented),
+      );
     },
     [products],
   );
@@ -109,17 +108,13 @@ const CartProvider: React.FC = ({ children }) => {
         return item;
       });
 
-      const productUpdatedIndex = productsDecremented.findIndex(
-        item => item.id === id,
-      );
-
-      await AsyncStorage.removeItem(`@GoMarketplace:${id}`);
-      await AsyncStorage.setItem(
-        `@GoMarketplace:${id}`,
-        JSON.stringify(productsDecremented[productUpdatedIndex]),
-      );
-
       setProducts(productsDecremented);
+
+      await AsyncStorage.removeItem(`@GoMarketplace:cart`);
+      await AsyncStorage.setItem(
+        `@GoMarketplace:cart`,
+        JSON.stringify(productsDecremented),
+      );
     },
     [products],
   );
